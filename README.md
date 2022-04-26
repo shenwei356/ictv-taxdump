@@ -142,6 +142,28 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         906833049    genus          Betacoronavirus
         1015862491   species        Severe acute respiratory syndrome-related coronavirus
         2363788870   no rank        severe acute respiratory syndrome coronavirus 2
+        
+        # in NCBI taxonomy
+        $ echo 2697049 \
+            | taxonkit lineage -t \
+            | csvtk cut -Ht -f 3 \
+            | csvtk unfold -Ht -f 1 -s ";" \
+            | taxonkit lineage -r -n -L \
+            | csvtk cut -Ht -f 1,3,2 \
+            | csvtk pretty -Ht
+        10239     superkingdom   Viruses
+        2559587   clade          Riboviria
+        2732396   kingdom        Orthornavirae
+        2732408   phylum         Pisuviricota
+        2732506   class          Pisoniviricetes
+        76804     order          Nidovirales
+        2499399   suborder       Cornidovirineae
+        11118     family         Coronaviridae
+        2501931   subfamily      Orthocoronavirinae
+        694002    genus          Betacoronavirus
+        2509511   subgenus       Sarbecovirus
+        694009    species        Severe acute respiratory syndrome-related coronavirus
+        2697049   no rank        Severe acute respiratory syndrome coronavirus 2
     
 ## Citation
 
