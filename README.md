@@ -109,6 +109,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             
         superkingdom   10
         phylum         17
+        class          39
         order          59
         family         189
         genus          2224
@@ -125,7 +126,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 1. Complete lineage
 
         $ echo 2363788870 | taxonkit lineage
-        2363788870      Orthornavirae;Pisuviricota;Nidovirales;Coronaviridae;Betacoronavirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
+        2363788870      Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Coronaviridae;Betacoronavirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
 
         # another format
         $ echo 2363788870 \
@@ -137,6 +138,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | csvtk pretty -Ht
         104708768    superkingdom   Orthornavirae
         1506901452   phylum         Pisuviricota
+        3239177245   class          Pisoniviricetes
         37745009     order          Nidovirales
         738421640    family         Coronaviridae
         906833049    genus          Betacoronavirus
@@ -145,7 +147,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         
         # in NCBI taxonomy
         $ echo 2697049 \
-            | taxonkit lineage -t \
+            | taxonkit lineage -t --data-dir ~/.taxonkit \
             | csvtk cut -Ht -f 3 \
             | csvtk unfold -Ht -f 1 -s ";" \
             | taxonkit lineage -r -n -L \
