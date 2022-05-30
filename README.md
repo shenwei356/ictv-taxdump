@@ -56,7 +56,7 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
 ### Steps
     
     # download here: https://talk.ictvonline.org/taxonomy/vmr/
-    file="VMR 18-191021 MSL36.xlsx"
+    file="VMR_19-250422_MSL37.xlsx"
     
     # conver xlsx to tsv
     csvtk xlsx2csv "$file" \
@@ -68,17 +68,18 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
     sed -i 's/\xc2\xa0/ /g' ictv.tsv
     
     # remove leading and tailing blanks. e.g., "Escherichia phage PhaxI\t"
-    csvtk replace -t -F -f "*" -p "^\s+|\s+$" ictv.tsv > ictv.clean.tsv
+    # remove a newline character and a space introduced by accident
+    csvtk replace -t -F -f "*" -p "^\s+|\s+$" ictv.tsv \
+        | csvtk replace -t -F -f "*" -p "\n " -r "" \
+        > ictv.clean.tsv
     
     # choose columns, and remove duplicates
-    csvtk cut -t -f "Kingdom,Phylum,Class,Order,Family,Genus,Species,Virus name(s)" ictv.clean.tsv \
-        | csvtk uniq -t -f "Kingdom,Phylum,Class,Order,Family,Genus,Species,Virus name(s)" \
-        | csvtk del-header -t \
+    csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" ictv.clean.tsv \
+        | csvtk uniq -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" \
         > ictv.taxonomy.tsv
 
     # create-taxdump
-    taxonkit create-taxdump -K 1 -P 2 -C 3 -O 4 -F 5 -G 6 -S 7 \
-        -A 8 --field-accession-re "^(.+)$" -T 8 \
+    taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
         ictv.taxonomy.tsv --out-dir ictv-taxdump/
     
     # set the environmental variable for taxonkit,
@@ -105,16 +106,21 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         $ taxonkit list --ids 1 \
             | taxonkit lineage -L -r \
             | csvtk freq -H -t -f 2 -n \
-            | csvtk pretty -H -t
-            
-        superkingdom   10
-        phylum         17
-        class          39
-        order          59
-        family         189
-        genus          2224
-        species        9110
-        no rank        9990
+            | csvtk pretty -H -t            
+        no rank         1
+        Subphylum       2
+        Realm           6
+        Suborder        8
+        Kingdom         10
+        Phylum          17
+        Class           39
+        Order           65
+        Subgenus        84
+        Subfamily       168
+        Family          233
+        Genus           2606
+        Species         10434
+        Virus name(s)   10539
         
 ### SARS-COV-2
 
@@ -126,7 +132,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 1. Complete lineage
 
         $ echo 2363788870 | taxonkit lineage
-        2363788870      Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Coronaviridae;Betacoronavirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
+        2363788870      Riboviria;Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Cornidovirineae;Coronaviridae;Orthocoronavirinae;Betacoronavirus;Sarbecovirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
 
         # another format
         $ echo 2363788870 \
@@ -136,14 +142,18 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | taxonkit lineage -r -n -L \
             | csvtk cut -Ht -f 1,3,2 \
             | csvtk pretty -Ht
-        104708768    superkingdom   Orthornavirae
-        1506901452   phylum         Pisuviricota
-        3239177245   class          Pisoniviricetes
-        37745009     order          Nidovirales
-        738421640    family         Coronaviridae
-        906833049    genus          Betacoronavirus
-        1015862491   species        Severe acute respiratory syndrome-related coronavirus
-        2363788870   no rank        severe acute respiratory syndrome coronavirus 2
+        492247681    Realm           Riboviria
+        104708768    Kingdom         Orthornavirae
+        1506901452   Phylum          Pisuviricota
+        3239177245   Class           Pisoniviricetes
+        37745009     Order           Nidovirales
+        2390145280   Suborder        Cornidovirineae
+        738421640    Family          Coronaviridae
+        1428506634   Subfamily       Orthocoronavirinae
+        906833049    Genus           Betacoronavirus
+        605136173    Subgenus        Sarbecovirus
+        1015862491   Species         Severe acute respiratory syndrome-related coronavirus
+        2363788870   Virus name(s)   severe acute respiratory syndrome coronavirus 2
         
         # in NCBI taxonomy
         $ echo 2697049 \

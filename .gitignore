@@ -19,3 +19,4 @@ ictv.tsv
 ictv.clean.tsv
 ictv.taxonomy.tsv
 *.xlsx
+test/*
