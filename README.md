@@ -27,6 +27,7 @@ Related projects:
 * [Results](#results)
     + [Summary](#summary)
     + [SARS-COV-2](#sars-cov-2)
+    + [Taxa with same names](#taxa-with-same-names)
 * [Citation](#citation)
 * [Contributing](#contributing)
 * [License](#license)
@@ -195,6 +196,30 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         694009    species        Severe acute respiratory syndrome-related coronavirus
         2697049   no rank        Severe acute respiratory syndrome coronavirus 2
     
+### Taxa with same names
+
+For examples species `Epseptimavirus ev329` and `Salmonella virus 329` both have a "Virus name" `Salmonella phage 3-29`.
+
+        $ cat ictv.taxonomy-with-subpsecies.tsv \
+            | csvtk grep -t -f subspecies -p 'Salmonella phage 3-29' \
+            | csvtk cut -t -f genus,species,subspecies \
+            | csvtk pretty -t
+        genus            species                subspecies
+        --------------   --------------------   ---------------------
+        Epseptimavirus   Epseptimavirus ev329   Salmonella phage 3-29
+        Epseptimavirus   Salmonella virus 329   Salmonella phage 3-29
+        
+They are assigned with different TaxIds and can be queried in `taxid.map`:
+
+        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subpsecies/taxid.map 
+        Salmonella phage 3-29   3010875164,3010875165
+        
+        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subpsecies/taxid.map \
+            | csvtk unfold -Ht -f 2 -s , \
+            | taxonkit lineage --data-dir ictv-taxdump-with-subpsecies/ -i 2 
+        Salmonella phage 3-29   3010875164      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Epseptimavirus ev329;Salmonella phage 3-29
+        Salmonella phage 3-29   3010875165      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Salmonella virus 329;Salmonella phage 3-29
+
 ## Citation
 
 > Shen, W., Ren, H., TaxonKit: a practical and efficient NCBI Taxonomy toolkit,

@@ -14,6 +14,7 @@ not-used
 taxonomy/*/*.tsv
 ictv-taxid-changelog.csv.gz
 ictv-taxdump.tar.gz
+ictv-taxdump-with-subpsecies.tar.gz
 taxid.map.stats*
 ictv.tsv
 ictv.clean.tsv
