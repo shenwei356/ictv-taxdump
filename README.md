@@ -51,7 +51,7 @@ using [xxhash](https://github.com/cespare/xxhash/) and convert it to `uint32`.
 
 The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/taxonomy/vmr/.
 
-[TaxonKit](https://github.com/shenwei356/taxonkit) v0.11.0 or later version is needed.
+[TaxonKit](https://github.com/shenwei356/taxonkit) v0.12.0 or later version is needed.
 
 ### Steps
     
@@ -73,14 +73,32 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
         | csvtk replace -t -F -f "*" -p "\n " -r "" \
         > ictv.clean.tsv
     
-    # choose columns, and remove duplicates
-    csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" ictv.clean.tsv \
-        | csvtk uniq -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" \
+    # ------------------- create-taxdump -----------------------
+    
+    # Option A
+    
+    # choose columns, rename, and remove duplicates
+    csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species" ictv.clean.tsv \
+        | csvtk rename -t -f 1-15 -n "realm,subrealm,kingdom,subkingdom,phylum,subphylum,class,subclass,order,suborder,family,subfamily,genus,subgenus,species" \
+        | csvtk uniq   -t -f 1-15 \
         > ictv.taxonomy.tsv
-
-    # create-taxdump
-    taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
+        
+    taxonkit create-taxdump -A 15 --field-accession-re "^(.+)$" \
         ictv.taxonomy.tsv --out-dir ictv-taxdump/
+
+ 
+    # Option B: treating "Virus name(s)" as subpsecies
+    
+    # choose columns, rename, and remove duplicates
+    csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" ictv.clean.tsv \
+        | csvtk rename -t -f 1-16 -n "realm,subrealm,kingdom,subkingdom,phylum,subphylum,class,subclass,order,suborder,family,subfamily,genus,subgenus,species,subspecies" \
+        | csvtk uniq   -t -f 1-16 \
+        > ictv.taxonomy-with-subpsecies.tsv
+        
+    taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
+        ictv.taxonomy-with-subpsecies.tsv --out-dir ictv-taxdump-with-subpsecies/
+
+
     
     # set the environmental variable for taxonkit,
     # so we don't need specifiy "--data-dir ictv-taxdump" for each taxonkit command.
@@ -95,38 +113,38 @@ The [release page](https://github.com/shenwei356/gtdb-taxdump/releases) contains
 Set the environmental variable for taxonkit,
 so we don't need specifiy "--data-dir ictv-taxdump" for each taxonkit command.
 
-    export TAXONKIT_DB=ictv-taxdump
+    export TAXONKIT_DB=ictv-taxdump-with-subpsecies
 
 Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usage/)
 
 ### Summary
 
-1. Count of all ranks (version: Virus Metadata Repository number 18, October 19 2021; MSL36)
+1. Count of all ranks (version: Virus Metadata Repository number 19, April 25 2022; MSL37)
     
         $ taxonkit list --ids 1 \
             | taxonkit lineage -L -r \
             | csvtk freq -H -t -f 2 -n \
             | csvtk pretty -H -t            
-        no rank         1
-        Subphylum       2
-        Realm           6
-        Suborder        8
-        Kingdom         10
-        Phylum          17
-        Class           39
-        Order           65
-        Subgenus        84
-        Subfamily       168
-        Family          233
-        Genus           2606
-        Species         10434
-        Virus name(s)   10539
+        no rank      1
+        subphylum    2
+        realm        6
+        suborder     8
+        kingdom      10
+        phylum       17
+        class        39
+        order        65
+        subgenus     84
+        subfamily    168
+        family       233
+        genus        2606
+        species      10434
+        subspecies   10539
         
 ### SARS-COV-2
 
 1. The TaxId
 
-        $ grep 'severe acute respiratory syndrome coronavirus 2' ictv-taxdump/taxid.map 
+        $ grep 'severe acute respiratory syndrome coronavirus 2' ictv-taxdump-with-subpsecies/taxid.map 
         severe acute respiratory syndrome coronavirus 2        2363788870
 
 1. Complete lineage
@@ -142,18 +160,18 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | taxonkit lineage -r -n -L \
             | csvtk cut -Ht -f 1,3,2 \
             | csvtk pretty -Ht
-        492247681    Realm           Riboviria
-        104708768    Kingdom         Orthornavirae
-        1506901452   Phylum          Pisuviricota
-        3239177245   Class           Pisoniviricetes
-        37745009     Order           Nidovirales
-        2390145280   Suborder        Cornidovirineae
-        738421640    Family          Coronaviridae
-        1428506634   Subfamily       Orthocoronavirinae
-        906833049    Genus           Betacoronavirus
-        605136173    Subgenus        Sarbecovirus
-        1015862491   Species         Severe acute respiratory syndrome-related coronavirus
-        2363788870   Virus name(s)   severe acute respiratory syndrome coronavirus 2
+        492247681    realm        Riboviria
+        104708768    kingdom      Orthornavirae
+        1506901452   phylum       Pisuviricota
+        3239177245   class        Pisoniviricetes
+        37745009     order        Nidovirales
+        2390145280   suborder     Cornidovirineae
+        738421640    family       Coronaviridae
+        1428506634   subfamily    Orthocoronavirinae
+        906833049    genus        Betacoronavirus
+        605136173    subgenus     Sarbecovirus
+        1015862491   species      Severe acute respiratory syndrome-related coronavirus
+        2363788870   subspecies   severe acute respiratory syndrome coronavirus 2
         
         # in NCBI taxonomy
         $ echo 2697049 \

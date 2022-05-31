@@ -18,5 +18,6 @@ taxid.map.stats*
 ictv.tsv
 ictv.clean.tsv
 ictv.taxonomy.tsv
+ictv.taxonomy-with-subpsecies.tsv
 *.xlsx
 test/*
