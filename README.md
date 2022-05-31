@@ -74,31 +74,25 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
         | csvtk replace -t -F -f "*" -p "\n " -r "" \
         > ictv.clean.tsv
     
-    # ------------------- create-taxdump -----------------------
-    
-    # Option A
-    
-    # choose columns, rename, and remove duplicates
-    csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species" ictv.clean.tsv \
-        | csvtk rename -t -f 1-15 -n "realm,subrealm,kingdom,subkingdom,phylum,subphylum,class,subclass,order,suborder,family,subfamily,genus,subgenus,species" \
-        | csvtk uniq   -t -f 1-15 \
-        > ictv.taxonomy.tsv
-        
-    taxonkit create-taxdump -A 15 --field-accession-re "^(.+)$" \
-        ictv.taxonomy.tsv --out-dir ictv-taxdump/
-
- 
-    # Option B: treating "Virus name(s)" as subpsecies
-    
     # choose columns, rename, and remove duplicates
     csvtk cut -t -f "Realm,Subrealm,Kingdom,Subkingdom,Phylum,Subphylum,Class,Subclass,Order,Suborder,Family,Subfamily,Genus,Subgenus,Species,Virus name(s)" ictv.clean.tsv \
         | csvtk rename -t -f 1-16 -n "realm,subrealm,kingdom,subkingdom,phylum,subphylum,class,subclass,order,suborder,family,subfamily,genus,subgenus,species,subspecies" \
         | csvtk uniq   -t -f 1-16 \
-        > ictv.taxonomy-with-subpsecies.tsv
+        > ictv.taxonomy.tsv
         
+    # ------------------- create-taxdump -----------------------
+    
+    # Option A: the lowest rank is species
     taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
-        ictv.taxonomy-with-subpsecies.tsv --out-dir ictv-taxdump-with-subpsecies/
+        ictv.taxonomy.tsv --out-dir ictv-taxdump/
 
+ 
+    # Option B: treating "Virus name(s)" as subspecies
+    taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
+        ictv.taxonomy.tsv --out-dir ictv-taxdump-with-subspecies/ \
+        --field-accession-as-subspecies
+
+    # ictv-taxdump/ is a subset of ictv-taxdump-with-subspecies/
 
     
     # set the environmental variable for taxonkit,
@@ -114,7 +108,7 @@ The [release page](https://github.com/shenwei356/gtdb-taxdump/releases) contains
 Set the environmental variable for taxonkit,
 so we don't need specifiy "--data-dir ictv-taxdump" for each taxonkit command.
 
-    export TAXONKIT_DB=ictv-taxdump-with-subpsecies
+    export TAXONKIT_DB=ictv-taxdump-with-subspecies
 
 Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usage/)
 
@@ -145,7 +139,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 
 1. The TaxId
 
-        $ grep 'severe acute respiratory syndrome coronavirus 2' ictv-taxdump-with-subpsecies/taxid.map 
+        $ grep 'severe acute respiratory syndrome coronavirus 2' ictv-taxdump-with-subspecies/taxid.map 
         severe acute respiratory syndrome coronavirus 2        2363788870
 
 1. Complete lineage
@@ -200,7 +194,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 
 For examples species `Epseptimavirus ev329` and `Salmonella virus 329` both have a "Virus name" `Salmonella phage 3-29`.
 
-        $ cat ictv.taxonomy-with-subpsecies.tsv \
+        $ cat ictv.taxonomy.tsv \
             | csvtk grep -t -f subspecies -p 'Salmonella phage 3-29' \
             | csvtk cut -t -f genus,species,subspecies \
             | csvtk pretty -t
@@ -211,12 +205,12 @@ For examples species `Epseptimavirus ev329` and `Salmonella virus 329` both have
         
 They are assigned with different TaxIds and can be queried in `taxid.map`:
 
-        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subpsecies/taxid.map 
+        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subspecies/taxid.map 
         Salmonella phage 3-29   3010875164,3010875165
         
-        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subpsecies/taxid.map \
+        $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subspecies/taxid.map \
             | csvtk unfold -Ht -f 2 -s , \
-            | taxonkit lineage --data-dir ictv-taxdump-with-subpsecies/ -i 2 
+            | taxonkit lineage --data-dir ictv-taxdump-with-subspecies/ -i 2 
         Salmonella phage 3-29   3010875164      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Epseptimavirus ev329;Salmonella phage 3-29
         Salmonella phage 3-29   3010875165      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Salmonella virus 329;Salmonella phage 3-29
 
