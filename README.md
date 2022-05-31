@@ -18,12 +18,12 @@ Related projects:
 
 ## Table of Contents
 
+* [Download](#download)
 * [Method](#method)
     + [Taxonomic hierarchy](#taxonomic-hierarchy)
     + [Generation of TaxIds](#generation-of-taxids)
     + [Data and tools](#data-and-tools)
     + [Steps](#steps)
-* [Download](#download)
 * [Results](#results)
     + [Summary](#summary)
     + [SARS-COV-2](#sars-cov-2)
@@ -31,6 +31,10 @@ Related projects:
 * [Citation](#citation)
 * [Contributing](#contributing)
 * [License](#license)
+
+## Download
+
+The [release page](https://github.com/shenwei356/gtdb-taxdump/releases) contains taxdump files.
 
 ## Method
 
@@ -40,7 +44,7 @@ Related projects:
 Most viruses have the seven-ranks (Kingdom, Phylum, Class, Order, Family, Genus, Species), and 
 each has a name. 
 
-We assign the virus name a TaxId with the rank of "no rank" below the species rank.
+Optionally, we assign the virus name a TaxId with the rank of "subspecies" below the species rank.
 Therefore, we can also track the changes of these assemblies via the TaxId later.
 
 ### Generation of TaxIds
@@ -48,6 +52,23 @@ Therefore, we can also track the changes of these assemblies via the TaxId later
 We just hash the taxon name (in lower case) of each taxon node to `uint64`
 using [xxhash](https://github.com/cespare/xxhash/) and convert it to `uint32`.
 
+Taxa from different parents may have the same name.
+We assign different TaxIds to them. E.g., many viruses from different species have the same names.
+
+    Species             Virus name(s)
+    Jerseyvirus SETP3   Salmonella phage SETP7
+    Jerseyvirus SETP7   Salmonella phage SETP7
+    
+    $ grep 'Salmonella phage SETP7' ictv-taxdump-with-subspecies/taxid.map 
+    Salmonella phage SETP7  2451596205,2451596206
+    
+    $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subspecies/taxid.map \
+        | csvtk unfold -Ht -f 2 -s , \
+        | taxonkit reformat -f 'genus: {g}, species: {s}, subspecies: {S}' \
+        --data-dir ictv-taxdump-with-subspecies/ -I 2
+    Salmonella phage 3-29   3010875164      genus: Epseptimavirus, species: Epseptimavirus ev329, subspecies: Salmonella phage 3-29
+    Salmonella phage 3-29   3010875165      genus: Epseptimavirus, species: Salmonella virus 329, subspecies: Salmonella phage 3-29
+    
 ### Data and tools
 
 The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/taxonomy/vmr/.
@@ -87,7 +108,7 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
         ictv.taxonomy.tsv --out-dir ictv-taxdump/
 
  
-    # Option B: treating "Virus name(s)" as subspecies
+    # Option B: treat "Virus name(s)" as subspecies
     taxonkit create-taxdump -A 16 --field-accession-re "^(.+)$" \
         ictv.taxonomy.tsv --out-dir ictv-taxdump-with-subspecies/ \
         --field-accession-as-subspecies
@@ -99,9 +120,6 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
     # so we don't need specifiy "--data-dir ictv-taxdump" for each taxonkit command.
     export TAXONKIT_DB=ictv-taxdump
 
-## Download
-
-The [release page](https://github.com/shenwei356/gtdb-taxdump/releases) contains taxdump files.
 
 ## Results
 
