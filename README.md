@@ -50,7 +50,7 @@ Therefore, we can also track the changes of these assemblies via the TaxId later
 ### Generation of TaxIds
 
 We just hash the taxon name (in lower case) of each taxon node to `uint64`
-using [xxhash](https://github.com/cespare/xxhash/) and convert it to `uint32`.
+using [xxhash](https://github.com/cespare/xxhash/) and convert it to `int32`.
 
 Taxa from different parents may have the same name.
 We assign different TaxIds to them. E.g., many viruses from different species have the same names.
@@ -73,7 +73,10 @@ We assign different TaxIds to them. E.g., many viruses from different species ha
 
 The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/taxonomy/vmr/.
 
-[TaxonKit](https://github.com/shenwei356/taxonkit) v0.12.0 or later version is needed.
+[TaxonKit](https://github.com/shenwei356/taxonkit) v0.12.0 or a later version is needed.
+[v0.14.0](https://github.com/shenwei356/taxonkit/blob/master/CHANGELOG.md) or a later version is preferred.
+**Since v0.14.0, [taxonkit create-taxdump](https://bioinf.shenwei.me/taxonkit/usage/#create-taxdump) stores
+TaxIds in `int32` following BLAST and DIAMOND, rather than `uint32` in previous versions**.
 
 ### Steps
     
@@ -124,7 +127,7 @@ The taxonomy data is released as a `.xlsx` file at https://talk.ictvonline.org/t
 ## Results
 
 Set the environmental variable for taxonkit,
-so we don't need specifiy "--data-dir ictv-taxdump" for each taxonkit command.
+so we don't need specifiy `--data-dir ictv-taxdump` for each taxonkit command.
 
     export TAXONKIT_DB=ictv-taxdump-with-subspecies
 
@@ -158,15 +161,15 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 1. The TaxId
 
         $ grep 'severe acute respiratory syndrome coronavirus 2' ictv-taxdump-with-subspecies/taxid.map 
-        severe acute respiratory syndrome coronavirus 2        2363788870
+        severe acute respiratory syndrome coronavirus 2        216305222
 
 1. Complete lineage
 
-        $ echo 2363788870 | taxonkit lineage
-        2363788870      Riboviria;Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Cornidovirineae;Coronaviridae;Orthocoronavirinae;Betacoronavirus;Sarbecovirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
+        $ echo 216305222 | taxonkit lineage
+        216305222      Riboviria;Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Cornidovirineae;Coronaviridae;Orthocoronavirinae;Betacoronavirus;Sarbecovirus;Severe acute respiratory syndrome-related coronavirus;severe acute respiratory syndrome coronavirus 2
 
         # another format
-        $ echo 2363788870 \
+        $ echo 216305222 \
             | taxonkit lineage -t \
             | csvtk cut -Ht -f 3 \
             | csvtk unfold -Ht -f 1 -s ";" \
@@ -176,22 +179,22 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         492247681    realm        Riboviria
         104708768    kingdom      Orthornavirae
         1506901452   phylum       Pisuviricota
-        3239177245   class        Pisoniviricetes
+        1091693597   class        Pisoniviricetes
         37745009     order        Nidovirales
-        2390145280   suborder     Cornidovirineae
+        242661632    suborder     Cornidovirineae
         738421640    family       Coronaviridae
         1428506634   subfamily    Orthocoronavirinae
         906833049    genus        Betacoronavirus
         605136173    subgenus     Sarbecovirus
         1015862491   species      Severe acute respiratory syndrome-related coronavirus
-        2363788870   subspecies   severe acute respiratory syndrome coronavirus 2
+        216305222    subspecies   severe acute respiratory syndrome coronavirus 2
         
         # in NCBI taxonomy
         $ echo 2697049 \
             | taxonkit lineage -t --data-dir ~/.taxonkit \
             | csvtk cut -Ht -f 3 \
             | csvtk unfold -Ht -f 1 -s ";" \
-            | taxonkit lineage -r -n -L \
+            | taxonkit lineage -r -n -L --data-dir ~/.taxonkit \
             | csvtk cut -Ht -f 1,3,2 \
             | csvtk pretty -Ht
         10239     superkingdom   Viruses
@@ -224,13 +227,13 @@ For examples species `Epseptimavirus ev329` and `Salmonella virus 329` both have
 They are assigned with different TaxIds and can be queried in `taxid.map`:
 
         $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subspecies/taxid.map 
-        Salmonella phage 3-29   3010875164,3010875165
+        Salmonella phage 3-29   863391516,863391517
         
         $ grep 'Salmonella phage 3-29' ictv-taxdump-with-subspecies/taxid.map \
             | csvtk unfold -Ht -f 2 -s , \
             | taxonkit lineage --data-dir ictv-taxdump-with-subspecies/ -i 2 
-        Salmonella phage 3-29   3010875164      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Epseptimavirus ev329;Salmonella phage 3-29
-        Salmonella phage 3-29   3010875165      Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Salmonella virus 329;Salmonella phage 3-29
+        Salmonella phage 3-29   863391516       Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Epseptimavirus ev329;Salmonella phage 3-29
+        Salmonella phage 3-29   863391517       Duplodnaviria;Heunggongvirae;Uroviricota;Caudoviricetes;Demerecviridae;Markadamsvirinae;Epseptimavirus;Salmonella virus 329;Salmonella phage 3-29
 
 ## Citation
 
