@@ -1,6 +1,11 @@
 .directory
 .brename_detail.txt
 
+*.xlsx
+ictv.tsv
+ictv.clean.tsv
+ictv.taxonomy.tsv
+
 names.dmp
 nodes.dmp
 merged.dmp
@@ -13,6 +18,7 @@ not-used
 *.tsv.gz
 taxonomy/*/*.tsv
 ictv-taxid-changelog.csv.gz
+ictv-taxdump
 ictv-taxdump.tar.gz
 ictv-taxdump-with-subspecies.tar.gz
 taxid.map.stats*
