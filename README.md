@@ -28,7 +28,7 @@ Related projects:
 - [Results](#results)
   - [Summary](#summary)
   - [Retrieving and reformating lineages](#retrieving-and-reformating-lineages)
-  - [Taxons with only parts of ranks](#taxons-with-only-parts-of-ranks)
+  - [Taxa with only parts of ranks](#taxa-with-only-parts-of-ranks)
   - [More manipulations](#more-manipulations)
 - [Citation](#citation)
 - [Contributing](#contributing)
@@ -45,7 +45,7 @@ The [release page](https://github.com/shenwei356/ictv-taxdump/releases) contains
 
 [Virus Metadata Resource (VMR)](https://talk.ictvonline.org/taxonomy/vmr/) provides taxonomy data of each release.
 Most viruses have the seven-ranks (Kingdom, Phylum, Class, Order, Family, Genus, Species),
-while some only have parts of the rank, like Genus and Species.
+while some only have parts of the ranks, like Genus and Species.
 
 ### Generation of TaxIds
 
@@ -138,23 +138,23 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 
     It perfectly matches the official data:
 
-    |Rank      |MSL38 Total|New |Abolished|Moved|Renamed|MSL.39 Total|
-    |:---------|----------:|---:|--------:|----:|------:|-----------:|
-    |Realm     |6          |0   |0        |0    |0      |6           |
-    |Subrealm  |0          |0   |0        |0    |0      |0           |
-    |Kingdom   |10         |0   |0        |0    |0      |10          |
-    |Subkingdom|0          |0   |0        |0    |0      |0           |
-    |Phylum    |17         |1   |0        |0    |0      |18          |
-    |Subphylum |2          |0   |0        |0    |0      |2           |
-    |Class     |40         |1   |0        |0    |1      |41          |
-    |Subclass  |0          |0   |0        |0    |0      |0           |
-    |Order     |72         |9   |0        |0    |3      |81          |
-    |Suborder  |8          |3   |0        |0    |0      |11          |
-    |Family    |264        |51  |-1       |11   |2      |314         |
-    |Subfamily |182        |18  |0        |1    |1      |200         |
-    |Genus     |2818       |820 |-116     |59   |1      |3522        |
-    |Subgenus  |84         |0   |0        |0    |0      |84          |
-    |Species   |11273      |3547|-130     |407  |2884   |14690
+        Rank         MSL38 Total    New   Abolished   Moved   Renamed   MSL.39 Total
+        ----------   -----------   ----   ---------   -----   -------   ------------
+        Realm                  6      0           0       0         0              6
+        Subrealm               0      0           0       0         0              0
+        Kingdom               10      0           0       0         0             10
+        Subkingdom             0      0           0       0         0              0
+        Phylum                17      1           0       0         0             18
+        Subphylum              2      0           0       0         0              2
+        Class                 40      1           0       0         1             41
+        Subclass               0      0           0       0         0              0
+        Order                 72      9           0       0         3             81
+        Suborder               8      3           0       0         0             11
+        Family               264     51          -1      11         2            314
+        Subfamily            182     18           0       1         1            200
+        Genus               2818    820        -116      59         1           3522
+        Subgenus              84      0           0       0         0             84
+        Species            11273   3547        -130     407      2884          14690
 
         
 ### Retrieving and reformating lineages
@@ -209,7 +209,7 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         2499399   suborder       Cornidovirineae
         11118     family         Coronaviridae
         2501931   subfamily      Orthocoronavirinae
-        694002    genus          Betacoronaviru
+        694002    genus          Betacoronavirus
     
 1. Reformat the lineage.
 
@@ -218,9 +218,9 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | taxonkit reformat -I 1 -f "{K};{p};{c};{o};{f};{g};{s}"
         418966335       Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Coronaviridae;Betacoronavirus;Betacoronavirus hongkongense
 
-### Taxons with only parts of ranks
+### Taxa with only parts of ranks
 
-1. Rhizidiomyces virus.
+1. *Rhizidiomyces virus*.
 
         $ echo 'Rhizidiomyces virus' | taxonkit name2taxid
         Rhizidiomyces virus     1826348565
@@ -239,14 +239,13 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
         156661886    genus     Rhizidiovirus
         1826348565   species   Rhizidiomyces virus
 
-1. Deltasatellite solaniflavussecundi.
+1. *Deltasatellite solaniflavussecundi*.
 
         $ echo 'Deltasatellite solaniflavussecundi' | taxonkit name2taxid
         Deltasatellite solaniflavussecundi      574171172
 
         $ echo 574171172 | taxonkit lineage
         574171172       Tolecusatellitidae;Deltasatellite;Deltasatellite solaniflavussecundi
-
 
         $ echo 574171172 \
             | taxonkit lineage -t \
