@@ -69,7 +69,7 @@ TaxIds in `int32` following BLAST and DIAMOND, rather than `uint32` in previous 
 ### Steps
 
     # download here: https://ictv.global/msl/current
-    file="ICTV_Master_Species_List_2023_MSL39.v2.xlsx"
+    file="ICTV_Master_Species_List_2024_MSL40.v1.xlsx"
     sheet="MSL"
 
     # conver xlsx to tsv
@@ -115,47 +115,26 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
 
 ### Summary
 
-1. Count of all ranks (version: MSL39)
+1. Count of all ranks (version: MSL40)
     
         $ taxonkit list --ids 1 \
             | taxonkit lineage -L -r \
             | csvtk freq -H -t -f 2 -n \
             | csvtk pretty -H -t
 
-        no rank     1
-        subphylum   2
-        realm       6
-        kingdom     10
-        suborder    11
-        phylum      18
-        class       41
-        order       81
-        subgenus    84
-        subfamily   200
-        family      314
-        genus       3522
-        species     14690
-
-    It perfectly matches the official data:
-
-        Rank         MSL38 Total    New   Abolished   Moved   Renamed   MSL.39 Total
-        ----------   -----------   ----   ---------   -----   -------   ------------
-        Realm                  6      0           0       0         0              6
-        Subrealm               0      0           0       0         0              0
-        Kingdom               10      0           0       0         0             10
-        Subkingdom             0      0           0       0         0              0
-        Phylum                17      1           0       0         0             18
-        Subphylum              2      0           0       0         0              2
-        Class                 40      1           0       0         1             41
-        Subclass               0      0           0       0         0              0
-        Order                 72      9           0       0         3             81
-        Suborder               8      3           0       0         0             11
-        Family               264     51          -1      11         2            314
-        Subfamily            182     18           0       1         1            200
-        Genus               2818    820        -116      59         1           3522
-        Subgenus              84      0           0       0         0             84
-        Species            11273   3547        -130     407      2884          14690
-
+        no rank     1    
+        subphylum   4    
+        realm       7    
+        kingdom     11   
+        suborder    12   
+        phylum      22   
+        class       49   
+        subgenus    86   
+        order       93   
+        subfamily   213  
+        family      368  
+        genus       3769 
+        species     16215
         
 ### Retrieving and reformating lineages
 
@@ -178,20 +157,21 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | csvtk cut -Ht -f 1,3,2 \
             | csvtk pretty -Ht
 
-        1864891977   realm       Riboviria
-        1844659726   kingdom     Orthornavirae
-        38781089     phylum      Pisuviricota
-        1832208221   class       Pisoniviricetes
-        1393610206   order       Nidovirales
-        218352182    suborder    Cornidovirineae
-        779314330    family      Coronaviridae
-        146452600    subfamily   Orthocoronavirinae
-        68549826     genus       Betacoronavirus
-        692402414    subgenus    Embecovirus
+        1864891977   realm       Riboviria                   
+        1844659726   kingdom     Orthornavirae               
+        38781089     phylum      Pisuviricota                
+        1832208221   class       Pisoniviricetes             
+        1393610206   order       Nidovirales                 
+        218352182    suborder    Cornidovirineae             
+        779314330    family      Coronaviridae               
+        146452600    subfamily   Orthocoronavirinae          
+        68549826     genus       Betacoronavirus             
+        692402414    subgenus    Embecovirus                 
         418966335    species     Betacoronavirus hongkongense
         
         # in NCBI taxonomy
-        $ echo 'Betacoronavirus' | taxonkit name2taxid --data-dir ~/.taxonkit \
+        $ echo 'Betacoronavirus hongkongense' \
+            | taxonkit name2taxid --data-dir ~/.taxonkit \
             | csvtk cut -Ht -f 2 \
             | taxonkit lineage -t --data-dir ~/.taxonkit \
             | csvtk cut -Ht -f 3 \
@@ -200,23 +180,23 @@ Check more [TaxonKit commands and usages](https://bioinf.shenwei.me/taxonkit/usa
             | csvtk cut -Ht -f 1,3,2 \
             | csvtk pretty -Ht
 
-        10239     superkingdom   Viruses
-        2559587   clade          Riboviria
-        2732396   kingdom        Orthornavirae
-        2732408   phylum         Pisuviricota
-        2732506   class          Pisoniviricetes
-        76804     order          Nidovirales
-        2499399   suborder       Cornidovirineae
-        11118     family         Coronaviridae
-        2501931   subfamily      Orthocoronavirinae
-        694002    genus          Betacoronavirus
+        10239     acellular root   Viruses           
+        2559587   realm            Riboviria         
+        2732396   kingdom          Orthornavirae     
+        2732408   phylum           Pisuviricota      
+        2732506   class            Pisoniviricetes   
+        76804     order            Nidovirales       
+        2499399   suborder         Cornidovirineae   
+        11118     family           Coronaviridae     
+        2501931   subfamily        Orthocoronavirinae
+        694002    genus            Betacoronavirus 
     
 1. Reformat the lineage.
 
-        # kingdom,phylum,class,order,family,genus,species
+        # realm,kingdom,phylum,class,order,family,genus,species
         $ echo 418966335 \
-            | taxonkit reformat -I 1 -f "{K};{p};{c};{o};{f};{g};{s}"
-        418966335       Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Coronaviridae;Betacoronavirus;Betacoronavirus hongkongense
+            | taxonkit reformat2 -I 1 -f "{domain|acellular root|superkingdom|realm};{kingdom};{phylum};{class};{order};{family};{genus};{species}"
+        418966335       Riboviria;Orthornavirae;Pisuviricota;Pisoniviricetes;Nidovirales;Coronaviridae;Betacoronavirus;Betacoronavirus hongkongense
 
 ### Taxa with only parts of ranks
 
